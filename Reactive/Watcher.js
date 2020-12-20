@@ -4,6 +4,7 @@
 // watcher的一种比较经典的使用方式是
 // vm.$watch('a.b.c',function(newVal, val) {})
 // 这样就需要我们将Watcher添加到data.a.b.c的Dep中，然后值变化的时候通知watcher就行，watcher再执行回调函数
+import { traverse } from './traverse'
 export class Watcher {
   constructor(vm, expOrFun, cb, options) {
     this.vm = vm;

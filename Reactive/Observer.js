@@ -4,7 +4,7 @@
  * 来收集属性的依赖，并当属性发生变化的时候通知这些依赖
  */
 import Dep from './Dep';
-import { def, hasProto, copyPrototype, augmentPrototype } from './utils';
+import { def, hasProto, copyPrototype, augmentPrototype, isValidArrayIndex } from './utils';
 import { interceptArr } from './array'
 class Observer {
   constructor(value) {
@@ -48,7 +48,7 @@ class Observer {
 }
 
 function defineReactive (obj, key, val) {
-  // 将
+  // 将变量转换成响应式
   const childOb = observe(obj);
   const dep = new Dep();
   Object.defineProperty(obj, key, {
@@ -85,3 +85,39 @@ function observe (obj) {
     return new Observe(obj)
   }
 }
+
+export function set (target, key, val) {
+  // 如果是数组，则需要判断索引是否合法然后通过splice改变数据即可，因为我们已经劫持了其splice方法，可以将其转换成响应式
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
+    target.length = Math.max(target.length, key);
+    target.splice(key, 1, val);
+    return val;
+  }
+
+  // 如果已经存在对象中的属性则直接赋值即可
+  if (key in target && !(key in Object.prototype)) {
+    target[key] = val;
+    return val;
+  }
+
+  const ob = target.__ob__;
+  // 如果是Vue实例或者或者 Vue 实例的根数据对象则进行报错
+  if (target._isVue || (ob && ob.vmCount)) {
+    process.env.NODE_ENV !== 'production' && console.warn(
+      `Avoid adding reactive properties to a Vue instance or its root $data at runtime - declare it upfront in the data option.`
+    )
+  }
+  // 如果该对象不是响应式的则直接赋值
+  if (!ob) {
+    target[key] = val;
+    return val;
+  }
+
+  // 将属性变成响应式
+  defineReactive(target, key, val);
+  // 通知依赖
+  ob.dep.notify();
+  return val;
+
+}
+

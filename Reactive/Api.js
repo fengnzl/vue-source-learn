@@ -7,6 +7,8 @@
  * }
  */
 import { Watcher } from "./Watcher";
+import { set } from './Observer'
+
 Vue.prototype.$watch = function (expOrFun, cb, options) {
   const vm = this;
   const options = options || {};
@@ -20,3 +22,15 @@ Vue.prototype.$watch = function (expOrFun, cb, options) {
     watcher.teardown();
   }
 }
+
+/**
+ * 参数：
+
+{Object | Array} target
+{string | number} propertyName/index
+{any} value
+返回值：设置的值。
+
+向响应式对象中添加一个 property，并确保这个新 property 同样是响应式的，且触发视图更新。它必须用于向响应式对象上添加新 property，因为 Vue 无法探测普通的新增 property
+ */
+Vue.prototype.$set = set
