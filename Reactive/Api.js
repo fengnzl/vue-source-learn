@@ -7,7 +7,7 @@
  * }
  */
 import { Watcher } from "./Watcher";
-import { set } from './Observer'
+import { set, del } from './Observer'
 
 Vue.prototype.$watch = function (expOrFun, cb, options) {
   const vm = this;
@@ -34,3 +34,15 @@ Vue.prototype.$watch = function (expOrFun, cb, options) {
 向响应式对象中添加一个 property，并确保这个新 property 同样是响应式的，且触发视图更新。它必须用于向响应式对象上添加新 property，因为 Vue 无法探测普通的新增 property
  */
 Vue.prototype.$set = set
+
+/**
+ * 参数：
+
+{Object | Array} target
+{string | number} propertyName/index
+仅在 2.2.0+ 版本中支持 Array + index 用法。
+
+删除对象的 property。如果对象是响应式的，确保删除能触发更新视图。这个方法主要用于避开 Vue 不能检测到 property 被删除的限制，但是你应该很少会使用它。
+ */
+
+Vue.prototype.$delete = del;

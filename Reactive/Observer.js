@@ -4,7 +4,7 @@
  * 来收集属性的依赖，并当属性发生变化的时候通知这些依赖
  */
 import Dep from './Dep';
-import { def, hasProto, copyPrototype, augmentPrototype, isValidArrayIndex } from './utils';
+import { def, hasProto, copyPrototype, augmentPrototype, isValidArrayIndex, hasOwn } from './utils';
 import { interceptArr } from './array'
 class Observer {
   constructor(value) {
@@ -119,5 +119,32 @@ export function set (target, key, val) {
   ob.dep.notify();
   return val;
 
+}
+
+export function del (target, key) {
+  // 如果是数组，则需要判断索引是否合法然后通过splice删除数据即可，因为我们已经劫持了其splice方法，在数组数据改变的时候进行依赖通知
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
+    target.splice(key, 1);
+    return;
+  }
+  // 如果不是target对象上的属性
+  if (!hasOwn(target, key)) {
+    return;
+  }
+
+  const ob = target.__ob__;
+  // 如果是Vue实例或者或者 Vue 实例的根数据对象则进行报错
+  if (target._isVue || (ob && ob.vmCount)) {
+    process.env.NODE_ENV !== 'production' && console.warn(
+      `Avoid deleting properties on a Vue instance or its root $data at runtime - just set it to null.`
+    )
+  }
+
+  delete target[key];
+  // 如果式响应式的数据
+  if (ob) {
+    // 通知依赖
+    ob.dep.notify();
+  }
 }
 
