@@ -5,7 +5,7 @@
 // vm.$watch('a.b.c',function(newVal, val) {})
 // 这样就需要我们将Watcher添加到data.a.b.c的Dep中，然后值变化的时候通知watcher就行，watcher再执行回调函数
 
-class Watcher {
+export class Watcher {
   constructor(vm, expOrFun, cb) {
     this.vm = vm;
     // 执行this.getter 函数即可获得a.b.c的值
